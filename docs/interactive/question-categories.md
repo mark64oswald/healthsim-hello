@@ -246,15 +246,168 @@ Learn about capabilities and inspect data.
 
 ---
 
+## RxMemberSim Questions
+
+### Generation Questions
+
+Create pharmacy benefit members and test data.
+
+#### Simple Generation
+```
+"Generate a pharmacy member"
+"Create an RxMemberSim member"
+"Make a synthetic pharmacy benefit member"
+```
+
+#### With BIN/PCN/Group
+```
+"Generate a member with BIN 610014"
+"Create a member with PCN RXTEST and Group GRP001"
+"Generate a member for pharmacy network testing"
+```
+
+#### With Accumulators
+```
+"Create a member with $500 deductible"
+"Generate a member who has met their deductible"
+"Create a member near their OOP max"
+```
+
+#### Batch Generation
+```
+"Generate 50 pharmacy members"
+"Create 100 members for PBM testing"
+"Generate a population for pharmacy utilization testing"
+```
+
+### Formulary Questions
+
+Check drug coverage and tier assignments.
+
+#### Coverage Checks
+```
+"Is metformin covered?"
+"Check coverage for NDC 00169413512"
+"What tier is Ozempic on?"
+"Is Humira on the formulary?"
+```
+
+#### PA Requirements
+```
+"Which drugs require prior authorization?"
+"Does Ozempic need PA?"
+"List PA-required GLP-1 medications"
+"What step therapy drugs are there?"
+```
+
+#### Tier Information
+```
+"Show me Tier 1 drugs"
+"What's the copay for Tier 3?"
+"List specialty tier drugs"
+"Show formulary tier structure"
+```
+
+### DUR Questions
+
+Drug utilization review and interaction checking.
+
+#### Drug Interactions
+```
+"Check interactions between warfarin and ibuprofen"
+"Are there interactions for this medication list?"
+"Test drug-drug interaction detection"
+"Check DUR for this claim"
+```
+
+#### Therapeutic Duplication
+```
+"Check for duplicate statins"
+"Is there therapeutic duplication?"
+"Test duplicate therapy detection"
+```
+
+#### Other DUR Checks
+```
+"Check early refill eligibility"
+"Test high dose detection"
+"Check age-related precautions for elderly patient"
+"Test gender contraindication detection"
+```
+
+### Prior Authorization Questions
+
+PA workflow testing.
+
+#### PA Requirements
+```
+"Why was this claim rejected for PA?"
+"What are the PA criteria for Ozempic?"
+"Submit a PA request for this member"
+```
+
+#### PA Decisions
+```
+"Show me PA approval scenario"
+"Test PA denial workflow"
+"What information is needed for PA?"
+"Test emergency PA auto-approval"
+```
+
+#### Appeals
+```
+"How do PA appeals work?"
+"Test the appeals process"
+"What's the IRO review process?"
+```
+
+### Export Questions
+
+Convert to NCPDP and other formats.
+
+#### NCPDP Formats
+```
+"Generate an NCPDP B1 claim request"
+"Export to NCPDP Telecommunication format"
+"Create a claim response message"
+```
+
+#### SCRIPT Standard
+```
+"Generate an NCPDP SCRIPT message"
+"Create an electronic prescription"
+"Export Rx to SCRIPT format"
+```
+
+### Inquiry Questions
+
+Learn about pharmacy benefit capabilities.
+
+```
+"What DUR alert types are available?"
+"Explain the formulary tier structure"
+"What NCPDP transaction codes exist?"
+"Show me this member's pharmacy history"
+"What reject codes can occur?"
+"List common PA rejection reasons"
+"What specialty pharmacy features exist?"
+```
+
+---
+
 ## Combined Questions
 
-Questions that span both products or require multiple operations.
+Questions that span multiple products or require multiple operations.
 
 ```
 "Generate 5 cardiac patients and export to FHIR"
 "Create a diabetic member with claims and export to 837"
 "Generate a cohort, validate it, and export to HL7v2"
 "Create members with care gaps and generate outreach list"
+"Generate a pharmacy member and process a metformin claim"
+"Create a member with claims history and check DUR for new Rx"
+"Submit a claim for Ozempic and walk through the PA process"
+"Generate 10 pharmacy members and batch test formulary coverage"
 ```
 
 ---
