@@ -452,6 +452,272 @@ Would you like me to:
 
 ---
 
+## RxMemberSim Conversations
+
+### Example 8: Pharmacy Member and Claim Processing
+
+Creating a pharmacy member and processing a basic claim.
+
+```
+👤 User: Generate a pharmacy member and process a claim for metformin
+
+🤖 Claude: I'll create a pharmacy benefit member and process a claim for metformin.
+
+Generated Pharmacy Member:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Member ID: MEM-7f8a9b12
+• Cardholder ID: CH-7f8a9b12
+• Name: John Smith
+• Age: 55 (Male)
+• DOB: 1969-03-15
+
+Pharmacy Identifiers:
+┌────────────────────────────────────────┐
+│ BIN:           610014                  │
+│ PCN:           RXTEST                  │
+│ Group:         GRP001                  │
+│ Person Code:   01 (Subscriber)         │
+└────────────────────────────────────────┘
+
+Accumulators (Year-to-Date):
+• Deductible: $0 of $500 (0%)
+• Out-of-Pocket: $0 of $3,000 (0%)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Now processing metformin claim...
+
+Formulary Check (NDC 00093017101 - Metformin 500mg):
+┌────────────────────────────────────────┐
+│ Covered:          Yes                  │
+│ Tier:             1 (Preferred Generic)│
+│ Copay:            $10.00               │
+│ Requires PA:      No                   │
+│ Step Therapy:     No                   │
+│ Quantity Limit:   180/30 days          │
+└────────────────────────────────────────┘
+
+Claim Adjudication Result:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Claim ID: CLM-001
+• Status: P (Paid) ✓
+• Authorization: AUTH-001234
+
+Financial Summary:
+┌────────────────────────────────────────┐
+│ Drug Cost:        $10.00               │
+│ Dispensing Fee:   $2.00                │
+│ Plan Pays:        $2.00                │
+│ Patient Pays:     $10.00 (copay)       │
+│ Deductible:       $0.00 (waived)       │
+└────────────────────────────────────────┘
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The claim was approved. Generic drugs on Tier 1 bypass the
+deductible and apply only the $10 copay.
+
+Would you like me to:
+• Process another claim for this member?
+• Check coverage for a different drug?
+• Test a DUR scenario with drug interactions?
+```
+
+---
+
+### Example 9: Formulary Check and DUR Screening
+
+Checking coverage and testing drug interactions.
+
+```
+👤 User: Check if Ozempic is covered, then test what happens with a
+warfarin and ibuprofen interaction
+
+🤖 Claude: I'll check Ozempic coverage and then demonstrate DUR
+screening for the warfarin/ibuprofen interaction.
+
+Formulary Check (NDC 00169413512 - Ozempic 0.5mg):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Coverage Status:
+┌────────────────────────────────────────┐
+│ Covered:          Yes                  │
+│ Tier:             5 (Specialty)        │
+│ Cost Share:       25% coinsurance      │
+│ Requires PA:      Yes ⚠️               │
+│ Step Therapy:     Yes ⚠️               │
+│ Specialty Rx:     Required             │
+└────────────────────────────────────────┘
+
+PA Criteria for GLP-1 Agonists:
+• Diagnosis: Type 2 Diabetes (E11.*)
+• A1c >= 7.0% documented within 90 days
+• Failed metformin trial (minimum 3 months)
+• No history of pancreatitis
+
+⚠️ Claims for Ozempic will reject with code 75 (PA Required)
+until prior authorization is obtained.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Now testing DUR for Warfarin + Ibuprofen...
+
+DUR Screening Result:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current Medications:
+• Ibuprofen 200mg (NSAID)
+
+Proposed Drug:
+• Warfarin 5mg (Anticoagulant)
+
+⚠️ DRUG-DRUG INTERACTION DETECTED
+
+┌────────────────────────────────────────────────────┐
+│ Alert Type:    DD (Drug-Drug Interaction)          │
+│ Severity:      Level 2 (Serious)                   │
+│ Override:      Allowed with intervention code      │
+│                                                    │
+│ Clinical Message:                                  │
+│ Concurrent use of warfarin and NSAIDs increases    │
+│ risk of GI bleeding. Consider alternative for      │
+│ pain management (e.g., acetaminophen).             │
+│                                                    │
+│ Recommendations:                                   │
+│ • Monitor for signs of bleeding                    │
+│ • Consider GI prophylaxis (PPI)                    │
+│ • Use lowest effective NSAID dose                  │
+│ • Alternative: Acetaminophen for pain              │
+└────────────────────────────────────────────────────┘
+
+DUR Response Codes:
+• DUR Passed: No
+• Alert Count: 1
+• Reject Code: 88 (DUR Reject)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The claim would soft-reject pending pharmacist review. The
+pharmacist can override with an intervention code documenting
+they counseled the patient.
+
+Would you like me to:
+• Test other drug interactions?
+• Show how to override with intervention code?
+• Test therapeutic duplication (e.g., two statins)?
+```
+
+---
+
+### Example 10: Prior Authorization Workflow
+
+Walking through the PA request and approval process.
+
+```
+👤 User: Submit a claim for Ozempic and show me the PA workflow
+
+🤖 Claude: I'll submit an Ozempic claim and walk through the
+complete prior authorization workflow.
+
+Step 1: Initial Claim Submission (No PA)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Submitting claim for Ozempic 0.5mg...
+
+Adjudication Result:
+┌────────────────────────────────────────────────────┐
+│ Status:          R (Rejected) ❌                   │
+│ Reject Code:     75                                │
+│ Message:         Prior Authorization Required      │
+│ Additional:      GLP-1 agonist requires PA         │
+└────────────────────────────────────────────────────┘
+
+Pharmacy must now initiate PA request.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Step 2: PA Request Submission
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Creating PA request with clinical documentation...
+
+PA Request Details:
+┌────────────────────────────────────────────────────┐
+│ PA Request ID:   PA-2024-001234                    │
+│ Member ID:       MEM-7f8a9b12                      │
+│ Drug:            Ozempic 0.5mg (00169413512)       │
+│ Prescriber:      Dr. Sarah Johnson                 │
+│ NPI:             1234567890                        │
+│ Urgency:         Standard (72-hour review)         │
+└────────────────────────────────────────────────────┘
+
+Clinical Documentation Submitted:
+• Diagnosis: E11.9 (Type 2 Diabetes)
+• A1c: 8.2% (documented 2024-01-10)
+• Metformin trial: 2000mg/day for 6 months
+• Notes: Failed to achieve glycemic control on
+  metformin monotherapy
+
+Criteria Assessment:
+┌────────────────────────────────────────────────────┐
+│ Criteria              │ Required │ Met │ Status   │
+├────────────────────────────────────────────────────┤
+│ T2DM Diagnosis        │    ✓     │  ✓  │ PASS    │
+│ A1c >= 7%             │    ✓     │  ✓  │ PASS    │
+│ Metformin Trial       │    ✓     │  ✓  │ PASS    │
+│ No Exclusions         │    ✓     │  ✓  │ PASS    │
+└────────────────────────────────────────────────────┘
+
+All criteria met - recommending approval.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Step 3: PA Decision
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PA Decision: APPROVED ✓
+
+┌────────────────────────────────────────────────────┐
+│ PA Number:       AUTH-2024-56789                   │
+│ Effective:       2024-01-15                        │
+│ Expires:         2024-07-15 (6 months)             │
+│ Approved Qty:    1 pen per 28 days                 │
+│ Refills:         5                                 │
+│ Renewal Note:    Updated A1c required for renewal  │
+└────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Step 4: Resubmit Claim with PA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Resubmitting claim with PA number...
+
+Adjudication Result:
+┌────────────────────────────────────────────────────┐
+│ Status:          P (Paid) ✓                        │
+│ Authorization:   AUTH-2024-56789                   │
+│ Drug Cost:       $850.00                           │
+│ Plan Pays:       $637.50                           │
+│ Patient Pays:    $212.50 (25% coinsurance)         │
+└────────────────────────────────────────────────────┘
+
+Claim approved with PA authorization. The member pays 25%
+coinsurance ($212.50) for this specialty medication.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 Tip: Many specialty drugs have copay assistance programs.
+Humira Complete, for example, can reduce patient cost to $5/month
+for commercial insurance members.
+
+Would you like me to:
+• Show a PA denial scenario?
+• Test the appeals process?
+• Generate batch PA requests?
+```
+
+---
+
 ## Tips for Effective Conversations
 
 ### 1. Be Specific When You Can
