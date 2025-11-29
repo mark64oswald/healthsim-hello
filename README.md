@@ -106,4 +106,4 @@ See [Interactive Setup](docs/interactive/mcp-setup.md) for configuration details
 
 ## License
 
-MIT License - See [LICENSE](LICENSE) for details.
+Apache License 2.0 - see [LICENSE](LICENSE) for details.

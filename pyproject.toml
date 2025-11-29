@@ -7,7 +7,7 @@ name = "healthsim-hello"
 version = "0.1.0"
 description = "Getting Started Tutorial for the HealthSim Platform"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
 authors = [
     {name = "Mark Oswald"}
