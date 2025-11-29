@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "healthsim-hello"
+version = "0.1.0"
+description = "Getting Started Tutorial for the HealthSim Platform"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Mark Oswald"}
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.0.0",
+]
+examples = [
+    "healthsim-core @ git+https://github.com/mark64oswald/healthsim-core.git",
+    "patientsim @ git+https://github.com/mark64oswald/patientsim.git",
+    "membersim @ git+https://github.com/mark64oswald/membersim.git",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "examples"]
+pythonpath = ["."]
+addopts = "-v --tb=short"
