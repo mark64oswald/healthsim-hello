@@ -1,6 +1,6 @@
 # Module Inventory
 
-A complete inventory of modules across all three HealthSim repositories.
+A complete inventory of modules across all four HealthSim repositories.
 
 ## healthsim-core Modules
 
@@ -21,6 +21,7 @@ The foundation library provides generic infrastructure with **no clinical or pay
 **Used by Products:**
 - PatientSim: `Patient.demographics`
 - MemberSim: `Member.demographics`
+- RxMemberSim: `RxMember.demographics`
 
 ---
 
@@ -377,24 +378,216 @@ Member
 
 ---
 
+## RxMemberSim Modules
+
+Domain-specific modules for pharmacy benefit management (PBM) data.
+
+### rxmembersim.core
+
+**Purpose:** Core pharmacy member and drug models
+
+| Model | Description |
+|-------|-------------|
+| `RxMember` | Pharmacy benefit member with BIN/PCN/Group |
+| `Drug` | Drug information with NDC, GPI |
+| `Accumulator` | Deductible/OOP/MOOP tracking |
+
+**Relationships:**
+```
+RxMember
+├── demographics: Demographics (from core)
+├── member_id: str
+├── bin: str (BIN number)
+├── pcn: str (Processor Control Number)
+├── group_number: str
+├── cardholder_id: str
+├── person_code: str
+└── accumulators: dict[str, Accumulator]
+```
+
+---
+
+### rxmembersim.claims
+
+**Purpose:** Pharmacy claims processing
+
+| Model | Description |
+|-------|-------------|
+| `PharmacyClaim` | NCPDP B1/B2 claim transaction |
+| `ClaimResponse` | Adjudication response with pricing |
+| `TransactionCode` | BILLING, REVERSAL, REBILL |
+| `ResponseStatus` | PAID, REJECTED, DUPLICATE |
+
+**Key Methods:**
+```python
+from rxmembersim.claims.claim import PharmacyClaim, TransactionCode
+from rxmembersim.claims.adjudication import AdjudicationEngine
+
+claim = PharmacyClaim(
+    ndc="00071015523",
+    quantity_dispensed=Decimal("30"),
+    days_supply=30,
+    ...
+)
+engine = AdjudicationEngine(formulary=formulary)
+response = engine.adjudicate(claim, member)
+```
+
+---
+
+### rxmembersim.formulary
+
+**Purpose:** Formulary management and drug coverage
+
+| Model | Description |
+|-------|-------------|
+| `Formulary` | Complete formulary with tier structure |
+| `FormularyEntry` | Drug coverage details |
+| `CoverageStatus` | Coverage check result |
+| `TierDefinition` | Tier cost-sharing rules |
+| `StepTherapy` | Step therapy requirements |
+| `QuantityLimit` | Quantity/days supply limits |
+
+**Tier Structures:**
+- Tier 1: Preferred generics (lowest copay)
+- Tier 2: Non-preferred generics
+- Tier 3: Preferred brands
+- Tier 4: Non-preferred brands
+- Tier 5: Specialty drugs (highest copay)
+
+---
+
+### rxmembersim.dur
+
+**Purpose:** Drug Utilization Review (DUR) screening
+
+| Model | Description |
+|-------|-------------|
+| `DURValidator` | Execute DUR checks |
+| `DURAlert` | Alert with severity and message |
+| `DURAlertType` | INTERACTION, DUPLICATE, EARLY_REFILL, etc. |
+| `DURResult` | Collection of alerts |
+
+**DUR Alert Types:**
+- Drug-drug interactions
+- Therapeutic duplication
+- Early refill detection
+- Maximum dose exceeded
+- Age/gender appropriateness
+- Allergy contraindications
+
+---
+
+### rxmembersim.authorization
+
+**Purpose:** Prior authorization and ePA workflows
+
+| Model | Description |
+|-------|-------------|
+| `PARequest` | Prior authorization request |
+| `PAResponse` | Authorization decision |
+| `PAStatus` | PENDING, APPROVED, DENIED, PARTIAL |
+| `PAWorkflow` | End-to-end PA processing |
+
+**ePA Support:**
+- NCPDP ePA transaction generation
+- Question set handling
+- Auto-approval for emergencies
+- Appeal processing
+
+---
+
+### rxmembersim.specialty
+
+**Purpose:** Specialty pharmacy workflows
+
+| Model | Description |
+|-------|-------------|
+| `HubEnrollment` | Specialty hub enrollment |
+| `REMSProgram` | REMS compliance tracking |
+| `CopayAssistance` | Copay card/assistance programs |
+| `ColdChain` | Temperature-sensitive handling |
+
+---
+
+### rxmembersim.pricing
+
+**Purpose:** Pharmacy pricing and rebates
+
+| Model | Description |
+|-------|-------------|
+| `DrugPricing` | AWP, WAC, MAC pricing |
+| `RebateCalculation` | Manufacturer rebate logic |
+| `SpreadPricing` | Plan/PBM spread calculations |
+| `CopayCard` | Manufacturer copay assistance |
+
+---
+
+### rxmembersim.scenarios
+
+**Purpose:** Pre-built test scenarios
+
+| Scenario | Description |
+|----------|-------------|
+| `new_therapy_approved` | New Rx fills successfully |
+| `step_therapy_required` | Step therapy enforcement |
+| `prior_auth_flow` | PA request to approval |
+| `specialty_onboarding` | Specialty hub enrollment |
+| `early_refill_reject` | Refill too soon rejection |
+| `drug_interaction_alert` | DUR interaction warning |
+
+---
+
+### rxmembersim.formats.ncpdp
+
+**Purpose:** NCPDP standard format generation
+
+| Generator | Format | Description |
+|-----------|--------|-------------|
+| `TelecomBuilder` | B1/B2 | Pharmacy claim transactions |
+| `SCRIPTBuilder` | SCRIPT | NewRx, RxChange, CancelRx |
+| `ePABuilder` | ePA | Electronic prior authorization |
+
+**NCPDP Versions:**
+- Telecommunication D.0 (B1/B2)
+- SCRIPT 2017071
+- ePA 2019
+
+---
+
+### rxmembersim.mcp
+
+**Purpose:** MCP server for Claude integration
+
+| Tool | Description |
+|------|-------------|
+| `generate_rx_member` | Create pharmacy member with BIN/PCN |
+| `check_formulary` | Look up drug coverage and tier |
+| `check_dur` | Execute DUR screening |
+| `submit_prior_auth` | Submit PA request |
+| `run_rx_scenario` | Execute pre-built scenario |
+| `list_scenarios` | List available scenarios |
+
+---
+
 ## Cross-Reference: How Products Use Core
 
-| Core Module | PatientSim Usage | MemberSim Usage |
-|-------------|------------------|-----------------|
-| `person.Demographics` | `Patient.demographics` | `Member.demographics` |
-| `person.Address` | Patient address | Member address |
-| `person.IdentifierGenerator` | MRN generation | Member ID generation |
-| `temporal.Timeline` | Encounter timelines | Claim timelines |
-| `temporal.Period` | Admission periods | Coverage periods |
-| `generation.BaseGenerator` | `PatientGenerator` | `MemberGenerator` |
-| `generation.WeightedChoice` | Diagnosis selection | Plan selection |
-| `generation.SeedManager` | Reproducible patients | Reproducible members |
-| `validation.ValidationResult` | Clinical validation | Claims validation |
-| `validation.BaseValidator` | `ClinicalValidator` | `ClaimsValidator` |
-| `formats.Transformer` | `FHIRTransformer` | `X12Generator` |
-| `formats.JSONSerializer` | FHIR Bundle output | JSON exports |
-| `skills.SkillLoader` | Clinical scenarios | Payer scenarios |
-| `config.Settings` | Configuration | Configuration |
+| Core Module | PatientSim Usage | MemberSim Usage | RxMemberSim Usage |
+|-------------|------------------|-----------------|-------------------|
+| `person.Demographics` | `Patient.demographics` | `Member.demographics` | `RxMember.demographics` |
+| `person.Address` | Patient address | Member address | Member address |
+| `person.IdentifierGenerator` | MRN generation | Member ID generation | Cardholder ID generation |
+| `temporal.Timeline` | Encounter timelines | Claim timelines | Prescription timelines |
+| `temporal.Period` | Admission periods | Coverage periods | Benefit periods |
+| `generation.BaseGenerator` | `PatientGenerator` | `MemberGenerator` | `RxMemberGenerator` |
+| `generation.WeightedChoice` | Diagnosis selection | Plan selection | Drug selection |
+| `generation.SeedManager` | Reproducible patients | Reproducible members | Reproducible Rx members |
+| `validation.ValidationResult` | Clinical validation | Claims validation | DUR validation |
+| `validation.BaseValidator` | `ClinicalValidator` | `ClaimsValidator` | `DURValidator` |
+| `formats.Transformer` | `FHIRTransformer` | `X12Generator` | `NCPDPBuilder` |
+| `formats.JSONSerializer` | FHIR Bundle output | JSON exports | JSON exports |
+| `skills.SkillLoader` | Clinical scenarios | Payer scenarios | Pharmacy scenarios |
+| `config.Settings` | Configuration | Configuration | Configuration |
 
 ---
 
@@ -410,6 +603,12 @@ Member
 | FHIR export | `patientsim.formats.fhir` |
 | HL7v2 messages | `patientsim.formats.hl7v2` |
 | Member models | `membersim.core` |
-| Claims | `membersim.claims` |
+| Medical claims | `membersim.claims` |
 | X12 EDI | `membersim.formats.x12` |
 | HEDIS/quality | `membersim.quality` |
+| Rx member models | `rxmembersim.core` |
+| Pharmacy claims | `rxmembersim.claims` |
+| Formulary/tiers | `rxmembersim.formulary` |
+| DUR screening | `rxmembersim.dur` |
+| NCPDP formats | `rxmembersim.formats.ncpdp` |
+| Pharmacy scenarios | `rxmembersim.scenarios` |

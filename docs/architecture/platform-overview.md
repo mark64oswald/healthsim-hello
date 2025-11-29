@@ -1,37 +1,37 @@
 # Platform Architecture Overview
 
-A visual guide to how the HealthSim platform is organized across its three repositories.
+A visual guide to how the HealthSim platform is organized across its four repositories.
 
-## The Three-Layer Architecture
+## The Layered Architecture
 
 HealthSim follows a layered architecture where shared infrastructure lives in a core library, and domain-specific products extend that foundation.
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         USER-FACING PRODUCTS                                 │
-│                                                                             │
-│   ┌─────────────────────────────┐     ┌─────────────────────────────┐      │
-│   │         PatientSim          │     │         MemberSim           │      │
-│   │      Clinical Domain        │     │       Payer Domain          │      │
-│   │                             │     │                             │      │
-│   │  Models:                    │     │  Models:                    │      │
-│   │  • Patient                  │     │  • Member                   │      │
-│   │  • Encounter                │     │  • Subscriber               │      │
-│   │  • Diagnosis                │     │  • Claim, ClaimLine         │      │
-│   │  • Procedure                │     │  • Plan, Provider           │      │
-│   │  • Medication               │     │  • Authorization            │      │
-│   │  • Observation              │     │  • QualityMeasure           │      │
-│   │                             │     │                             │      │
-│   │  Formats:                   │     │  Formats:                   │      │
-│   │  • FHIR R4                  │     │  • X12 834 (Enrollment)     │      │
-│   │  • HL7v2 (ADT, ORM, ORU)   │     │  • X12 837 (Claims)         │      │
-│   │  • MIMIC-III                │     │  • X12 835 (Remittance)     │      │
-│   │                             │     │  • X12 270/271 (Eligibility)│      │
-│   └──────────────┬──────────────┘     └──────────────┬──────────────┘      │
-│                  │                                   │                      │
-│                  │         Both depend on            │                      │
-│                  └───────────────┬───────────────────┘                      │
-│                                  │                                          │
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    USER-FACING PRODUCTS                                           │
+│                                                                                                  │
+│   ┌────────────────────────┐  ┌────────────────────────┐  ┌────────────────────────┐            │
+│   │       PatientSim       │  │       MemberSim        │  │      RxMemberSim       │            │
+│   │    Clinical Domain     │  │      Payer Domain      │  │    Pharmacy Domain     │            │
+│   │                        │  │                        │  │                        │            │
+│   │  Models:               │  │  Models:               │  │  Models:               │            │
+│   │  • Patient             │  │  • Member              │  │  • RxMember            │            │
+│   │  • Encounter           │  │  • Subscriber          │  │  • Drug                │            │
+│   │  • Diagnosis           │  │  • Claim, ClaimLine    │  │  • PharmacyClaim       │            │
+│   │  • Procedure           │  │  • Plan, Provider      │  │  • Formulary           │            │
+│   │  • Medication          │  │  • Authorization       │  │  • DUR Alert           │            │
+│   │  • Observation         │  │  • QualityMeasure      │  │  • PriorAuth           │            │
+│   │                        │  │                        │  │                        │            │
+│   │  Formats:              │  │  Formats:              │  │  Formats:              │            │
+│   │  • FHIR R4             │  │  • X12 834 (Enroll)    │  │  • NCPDP Telecom (B1/B2)│           │
+│   │  • HL7v2 (ADT,ORM,ORU) │  │  • X12 837 (Claims)    │  │  • NCPDP SCRIPT        │            │
+│   │  • MIMIC-III           │  │  • X12 835 (Remit)     │  │  • NCPDP ePA           │            │
+│   │                        │  │  • X12 270/271 (Elig)  │  │  • JSON/CSV            │            │
+│   └───────────┬────────────┘  └───────────┬────────────┘  └───────────┬────────────┘            │
+│               │                           │                           │                          │
+│               │              All depend on healthsim-core             │                          │
+│               └───────────────────────────┼───────────────────────────┘                          │
+│                                           │                                                      │
 │   ┌──────────────────────────────▼──────────────────────────────────────┐  │
 │   │                        HEALTHSIM-CORE                                │  │
 │   │                   Shared Foundation Library                          │  │
@@ -60,7 +60,7 @@ HealthSim follows a layered architecture where shared infrastructure lives in a 
 
 ### 1. Shared Foundation Prevents Code Duplication
 
-Both PatientSim and MemberSim need:
+All three products (PatientSim, MemberSim, RxMemberSim) need:
 - Person demographics (names, addresses, dates of birth)
 - Timeline management (events in sequence)
 - Data validation (structural and temporal)
@@ -78,10 +78,10 @@ When you learn how PatientSim works, you already understand MemberSim because th
 
 ### 3. Easy to Add New Products
 
-Future products (like RxMemberSim for pharmacy benefits) can be built quickly by:
+RxMemberSim for pharmacy benefits was built quickly by:
 1. Depending on healthsim-core
-2. Adding domain-specific models
-3. Adding domain-specific formats
+2. Adding domain-specific models (Drug, PharmacyClaim, Formulary)
+3. Adding domain-specific formats (NCPDP Telecom, SCRIPT, ePA)
 4. Reusing all the infrastructure
 
 ### 4. Clear Separation of Concerns
@@ -91,46 +91,49 @@ Future products (like RxMemberSim for pharmacy benefits) can be built quickly by
 | **healthsim-core** | Generic infrastructure (no healthcare domain concepts) |
 | **PatientSim** | Clinical domain (patients, encounters, diagnoses) |
 | **MemberSim** | Payer domain (members, claims, eligibility) |
+| **RxMemberSim** | Pharmacy domain (prescriptions, PBM claims, formulary) |
 
 ## Repository Relationships
 
 ### Dependency Direction
 
 ```
-┌─────────────┐     ┌─────────────┐
-│ PatientSim  │     │  MemberSim  │
-└──────┬──────┘     └──────┬──────┘
-       │                   │
-       │    depends on     │
-       └─────────┬─────────┘
-                 │
-                 ▼
-       ┌─────────────────┐
-       │  healthsim-core │
-       └────────┬────────┘
-                │
-                │  depends on
-                ▼
-       ┌─────────────────┐
-       │ pydantic, faker │
-       │   (minimal)     │
-       └─────────────────┘
+┌─────────────┐  ┌─────────────┐  ┌──────────────┐
+│ PatientSim  │  │  MemberSim  │  │ RxMemberSim  │
+└──────┬──────┘  └──────┬──────┘  └──────┬───────┘
+       │                │                │
+       │        All depend on            │
+       └────────────────┼────────────────┘
+                        │
+                        ▼
+              ┌─────────────────┐
+              │  healthsim-core │
+              └────────┬────────┘
+                       │
+                       │  depends on
+                       ▼
+              ┌─────────────────┐
+              │ pydantic, faker │
+              │   (minimal)     │
+              └─────────────────┘
 ```
 
 ### Key Principles
 
-1. **Core has no clinical or payer concepts**
-   - No `Patient`, `Member`, `Diagnosis`, `Claim`
+1. **Core has no clinical, payer, or pharmacy concepts**
+   - No `Patient`, `Member`, `Diagnosis`, `Claim`, `Drug`
    - Only generic: `Demographics`, `Timeline`, `Period`
 
 2. **Products extend, don't copy**
    - `Patient` uses `Demographics` from core
    - `Member` uses `Demographics` from core
-   - Both get identical demographic handling
+   - `RxMember` uses `Demographics` from core
+   - All get identical demographic handling
 
 3. **Products add domain knowledge**
    - PatientSim knows about ICD-10, FHIR, HL7v2
    - MemberSim knows about X12, HIPAA, HEDIS
+   - RxMemberSim knows about NCPDP, NDC, DUR rules
 
 ## How Products Extend Core
 
@@ -276,6 +279,7 @@ When using HealthSim conversationally through Claude:
 | **healthsim-core** | Foundation | Demographics, Timeline, BaseGenerator, Validation framework |
 | **PatientSim** | Clinical Product | Patient, Encounter, Diagnosis; FHIR, HL7v2 exports |
 | **MemberSim** | Payer Product | Member, Claim, Plan; X12 EDI exports |
+| **RxMemberSim** | Pharmacy Product | RxMember, PharmacyClaim, Formulary, DUR; NCPDP exports |
 
 The architecture ensures:
 - **Consistency** - Same patterns across products
