@@ -4,13 +4,23 @@ A comprehensive getting-started guide for the HealthSim synthetic healthcare dat
 
 ## What is HealthSim?
 
-HealthSim is a platform for generating realistic synthetic healthcare data through two complementary products built on a shared foundation:
+HealthSim is a platform for generating realistic synthetic healthcare data through three complementary products built on a shared foundation:
 
-| Repository | Purpose | Output Formats |
-|------------|---------|----------------|
-| **[healthsim-core](https://github.com/mark64oswald/healthsim-core)** | Shared foundation library | - |
-| **[PatientSim](https://github.com/mark64oswald/patientsim)** | Clinical patient data generation | FHIR R4, HL7v2, MIMIC-III |
-| **[MemberSim](https://github.com/mark64oswald/membersim)** | Health plan member/claims data | X12 EDI (834, 837, 835, etc.) |
+| Repository | Domain | Key Capabilities |
+|------------|--------|------------------|
+| **[healthsim-core](https://github.com/mark64oswald/healthsim-core)** | Foundation | Shared models, validation, temporal logic |
+| **[PatientSim](https://github.com/mark64oswald/patientsim)** | Clinical | Patient records, encounters, HL7v2, FHIR |
+| **[MemberSim](https://github.com/mark64oswald/membersim)** | Payer | Member enrollment, claims, X12 EDI |
+| **[RxMemberSim](https://github.com/mark64oswald/rxmembersim)** | Pharmacy | Prescriptions, PBM claims, NCPDP, ePA |
+
+### RxMemberSim - Pharmacy Benefits
+Generate synthetic pharmacy data:
+- 💊 Prescriptions and e-prescribing (NCPDP SCRIPT)
+- 💳 PBM claims and adjudication (NCPDP Telecom)
+- 📋 Formulary and DUR rules
+- ✅ Prior authorization and ePA
+- 🏥 Specialty pharmacy workflows
+- 💰 Pricing, rebates, copay assistance
 
 ## 📚 Tutorial Contents
 
@@ -30,6 +40,7 @@ Step-by-step guides with working code:
 - [Environment Setup](docs/tutorials/environment-setup.md) - Get everything installed
 - [PatientSim Tutorial](docs/tutorials/patientsim-tutorial.md) - Generate clinical data
 - [MemberSim Tutorial](docs/tutorials/membersim-tutorial.md) - Generate payer data
+- [RxMemberSim Tutorial](docs/tutorials/rxmembersim-tutorial.md) - Generate pharmacy data
 
 ### Interactive (Conversational) Use
 Using HealthSim through Claude Desktop or Claude Code:
@@ -56,6 +67,13 @@ from membersim import MemberGenerator
 gen = MemberGenerator(seed=42)
 member = gen.generate_member()
 print(f"Member: {member.member_id}, Plan: {member.plan_code}")
+
+# RxMemberSim - Generate pharmacy data
+from rxmembersim.core.member import RxMemberGenerator
+
+gen = RxMemberGenerator()
+member = gen.generate(bin="610014", pcn="RXTEST")
+print(f"Member: {member.member_id}, BIN/PCN: {member.bin}/{member.pcn}")
 ```
 
 ### Option 2: Conversational (with Claude)
@@ -66,15 +84,18 @@ Once MCP servers are configured, simply ask:
 
 > "Create a member enrolled in PPO Gold with claims history"
 
+> "Generate a pharmacy claim for 30 tablets of atorvastatin"
+
 See [Interactive Setup](docs/interactive/mcp-setup.md) for configuration details.
 
 ## 📦 Related Repositories
 
 | Repository | Description | Status |
 |------------|-------------|--------|
-| [healthsim-core](https://github.com/mark64oswald/healthsim-core) | Shared foundation library | Foundation |
+| [healthsim-core](https://github.com/mark64oswald/healthsim-core) | Shared foundation library | v0.2.0 |
 | [patientsim](https://github.com/mark64oswald/patientsim) | Clinical data generation | Active |
 | [membersim](https://github.com/mark64oswald/membersim) | Payer data generation | Active |
+| [rxmembersim](https://github.com/mark64oswald/rxmembersim) | Pharmacy data generation | v1.0.0 |
 
 ## Prerequisites
 
